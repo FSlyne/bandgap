@@ -2,16 +2,16 @@
 use IO::Socket::INET;
 use Time::HiRes qw(time alarm sleep);
 
-my $dest='otherhost';
+my $dest='10.0.0.123';
 my $alt='10.10.10.10';
-my $port=1234;
+my $port=9090;
 my $max=1000000;
 #
 my $payload=randPayload(1500);
 
 my $debug=1;
 my $packetsize=30;
-my $delay=0.01; my $delayms = $delay*1000;
+my $delay=0.001; my $delayms = $delay*1000;
 my $sendevery=1/$delay;
 
 my $mySocket=new IO::Socket::INET->new(PeerPort=>$port,
@@ -43,9 +43,19 @@ sleep 1 while 1;
 
 exit;
 
+sub chksum {
+  my ($string) = @_;
+  my $v = 0;
+  $v ^= $_ for unpack 'C*', $string;
+  my $ret = sprintf '%02X', $v;
+  return $ret;
+}
+
 sub createMsg {
 my $msg = shift;
-return $msg.substr($payload,0,$packetsize-length($msg));
+my $p = substr($payload,0,$packetsize-length($msg));
+my $cks = chksum($p);
+return $msg.$p.':'.$cks;
 }
 
 sub setInterval {
