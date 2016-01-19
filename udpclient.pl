@@ -2,7 +2,7 @@
 use IO::Socket::INET;
 use Time::HiRes qw(time);
 
-my $mySocket=new IO::Socket::INET->new(LocalPort=>1234,
+my $mySocket=new IO::Socket::INET->new(LocalPort=>9090,
         Proto=>'udp');
 
 my $threshold=5;
