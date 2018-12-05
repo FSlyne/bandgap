@@ -8,10 +8,11 @@ import threading
 testing=True
 dest='10.10.10.56'
 dest='10.0.0.44'
+dest='127.0.0.1'
 port=9090
 max=1000000
 debug=1
-packetsize=30;
+packetsize=100;
 delay=0.001; delayms = delay*1000;
 sendevery=1/delay;
 totalbytes=0
