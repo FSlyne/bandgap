@@ -1,4 +1,5 @@
 from random import choice
+import argparse
 import string
 import time
 import sys
@@ -8,15 +9,12 @@ import numpy as np
 
 delimiter='$$$'
 testing=False
-dest='10.10.10.56'
-dest='10.0.0.44'
-dest='10.0.0.3'
-dest='172.16.0.2'
-# dest='10.10.10.91' # destination IP address
-port=9090
-port=2000 # UDP port
+defaultdest='172.16.0.2'
+defaultport=2000 # UDP port
+defaultredis_server='54.229.160.231'
+defaultredis_port=9999
 max=1000000 # packets to send
-debug=1
+debug=0
 packetsize=1000;
 delay=0.0005; delayms = delay*1000;
 sendevery=1/delay;
@@ -27,12 +25,6 @@ totbytes=0
 linerate=1000
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-remoteaddress = (dest, port)
-
-print remoteaddress
-
-t= time.time();
 
 def threaded(fn):
     def wrapper(*args, **kwargs):
@@ -63,6 +55,25 @@ def calcstats():
        secbytes=0 
     totbytes=0
     time.sleep(0.2)
+
+def timestamp():
+   import datetime
+   return '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now())
+
+@threaded
+def dblogger():
+   import redis
+   hostname = redishost
+   port = redisport
+   r=redis.Redis(host=hostname, port=port)
+   global linerate
+   while True:
+      try:
+         r.hset('udp_server_function','trafficbps',int(linerate))
+         r.hset('udp_server_function','datetime',timestamp())
+      except:
+         print "Error writing to remote database"
+      time.sleep(1)
 
 @threaded
 def wavefunction(fntype='sawtooth', low=1000000, high=20000000, step=1000000,wait=1):
@@ -103,8 +114,19 @@ def wavefunction(fntype='sawtooth', low=1000000, high=20000000, step=1000000,wai
              time.sleep(25)
              linerate = 1000000
              time.sleep(25)
-        
-
+    elif fntype == "remote":
+         import redis
+         hostname = redishost
+         port = redisport
+         r=redis.Redis(host=hostname, port=port)
+         while True:
+            try:
+               tbps=r.hget('udp_server_function','trafficbps')
+               linerate = int(tbps)
+               print linerate
+               time.sleep(1)
+            except:
+               print "Error reading from remote database"
 
 def chksum(string):
   checksum=0
@@ -174,13 +196,46 @@ class testmode(object):
          time.sleep(self.downtime)
 
 if __name__ == '__main__':
+#    global dest, port, func, debug, mode, testing, remoteaddress, t
+#   https://realpython.com/command-line-interfaces-python-argparse/
+   my_parser=argparse.ArgumentParser(description='Generate Local and Remote traffic profiles')
+   my_parser.add_argument('-d', '--dest', action='store', metavar='dest', help='Destination UDP IP address', default=defaultdest)
+   my_parser.add_argument('-p', '--port', action='store', metavar='port', type=int, help='Destination UDP port address', default=defaultport)
+   my_parser.add_argument('-f', '--func', action='store', metavar='func', help='Waveform function: sawtooth sine flat square remote', default='sine')
+   my_parser.add_argument('-b', '--debug',action='store', metavar='debug',type=int, help='Debugging: 0 1', default=0)
+   my_parser.add_argument('-m', '--mode', action='store', metavar='mode', help='Mode: local remote', default='local')
+   my_parser.add_argument('-t', '--test', action='store', metavar='test', type=int, help='Test Mode: 0 1', default=0)
+   my_parser.add_argument('-e', '--dbadd', action='store', metavar='dbadd', help='DB address', default=defaultredis_server)
+   my_parser.add_argument('-g', '--dbport',action='store', metavar='dbport',help='DB port', default=defaultredis_port)
+
+   args = my_parser.parse_args()
+   print args
+   dest = args.dest
+   port = args.port
+   func = args.func
+   debug= args.debug
+   mode = args.mode
+   testing = args.test
+   redishost=args.dbadd
+   redisport=args.dbport
+   
+
+   remoteaddress = (dest, port); 
+#   print "Func: %s, dest: %s, port: %d, mode: %s, testing: %d" % (func, dest, port, mode, testing)
+   t=time.time()
+
    payload=randPayload(1500)
 
    if testing:
       testmode(2,1.456)
 
+   if mode == 'remote':
+      if func == 'remote':
+         print "conflict: remote function and remote logging"
+         exit()
+      dblogger()
    calcstats()
-   wavefunction('sine')
+   wavefunction(func)
 
    while True:
       sendpacket()
