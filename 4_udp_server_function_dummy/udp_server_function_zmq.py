@@ -79,7 +79,9 @@ def dblogger():
 
 class tbpssub(zmqSubscriber):
    def process(self,mst,msg):
+      global linerate
       # tbps_level=1000000
+      print mst, msg
       if 'tbps' in msg:
           try:
             a,v=msg.split('=')
@@ -89,7 +91,7 @@ class tbpssub(zmqSubscriber):
 
 class TBPSThread(threading.Thread):
    def run(self):
-     b=tbpssub("TBPS")
+     b=tbpssub("TBPS","10.10.10.195")
 
 @threaded
 def wavefunction(fntype='sawtooth', low=1000000, high=20000000, step=1000000,wait=1):
@@ -130,8 +132,6 @@ def wavefunction(fntype='sawtooth', low=1000000, high=20000000, step=1000000,wai
              time.sleep(25)
              linerate = 1000000
              time.sleep(25)
-    elif fntype == "remote":
-         TBPSThread().start()
 
 def chksum(string):
   checksum=0
@@ -240,7 +240,10 @@ if __name__ == '__main__':
          exit()
       dblogger()
    calcstats()
-   wavefunction(func)
+   if func =='remote':
+       TBPSThread().start()
+   else:
+       wavefunction(func)
 
    while True:
       sendpacket()
