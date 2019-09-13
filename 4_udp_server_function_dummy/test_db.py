@@ -9,6 +9,8 @@ timeout=70
 logfile='error.log'
 tbps=12345678
 
+qos_level=3
+
 r = redis.Redis(
     host=hostname,
     port=port )
@@ -19,6 +21,10 @@ def timestamp():
 try:
   r.hset('udp_server_function','trafficbps',tbps)
   r.hset('udp_server_function','datetime',timestamp())
+  r.hset('qos_level','qos',qos_level)
+  r.hset('qos_level','datetime',timestamp())
+  r.hset('qos_level','status','written')
+
 #  r.expire('keep-alive',timeout)
 except:
   with open(logfile, "a") as myfile:
