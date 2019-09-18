@@ -14,7 +14,10 @@ defaultdest='172.16.0.2'
 defaultport=2000 # UDP port
 defaultredis_server='54.229.160.231'
 defaultredis_port=9999
+<<<<<<< HEAD
 defaulttag="A"
+defaultzmqbroker='10.10.10.41'
+>>>>>>> 39acc71895fc9797574110bc9888d4bec5e03925
 max=1000000 # packets to send
 debug=0
 packetsize=1000;
@@ -93,8 +96,10 @@ class tbpssub(zmqSubscriber):
 
 class TBPSThread(threading.Thread):
    def run(self):
+<<<<<<< HEAD
      global tag
-     b=tbpssub("TBPS%s" % tag,"10.10.10.195")
+     b=tbpssub("TBPS%s",defaultzmqbroker)
+>>>>>>> 39acc71895fc9797574110bc9888d4bec5e03925
 
 @threaded
 def wavefunction(fntype='sawtooth', low=1000000, high=20000000, step=1000000,wait=1):
