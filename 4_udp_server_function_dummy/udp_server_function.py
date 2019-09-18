@@ -13,6 +13,7 @@ defaultdest='172.16.0.2'
 defaultport=2000 # UDP port
 defaultredis_server='54.229.160.231'
 defaultredis_port=9999
+defaulttag="A"
 max=1000000 # packets to send
 debug=0
 packetsize=1000;
@@ -67,10 +68,12 @@ def dblogger():
    port = redisport
    r=redis.Redis(host=hostname, port=port)
    global linerate
+   global tag
+   print 'udp_server_function%s' % tag
    while True:
       try:
-         r.hset('udp_server_function','trafficbps',int(linerate))
-         r.hset('udp_server_function','datetime',timestamp())
+         r.hset('udp_server_function%s' % tag,'trafficbps',int(linerate))
+         r.hset('udp_server_function%s' % tag,'datetime',timestamp())
       except:
          print "Error writing to remote database"
       time.sleep(1)
@@ -207,6 +210,7 @@ if __name__ == '__main__':
    my_parser.add_argument('-t', '--test', action='store', metavar='test', type=int, help='Test Mode: 0 1', default=0)
    my_parser.add_argument('-e', '--dbadd', action='store', metavar='dbadd', help='DB address', default=defaultredis_server)
    my_parser.add_argument('-g', '--dbport',action='store', metavar='dbport',help='DB port', default=defaultredis_port)
+   my_parser.add_argument('-r', '--tag', action='store', metavar='tag', help='Tag', default=defaulttag)
 
    args = my_parser.parse_args()
    print args
@@ -218,6 +222,7 @@ if __name__ == '__main__':
    testing = args.test
    redishost=args.dbadd
    redisport=args.dbport
+   tag=args.tag
    
 
    remoteaddress = (dest, port); 

@@ -1,1 +1,1 @@
-python udp_server_function.py -m remote
+python udp_server_function.py -m remote -r A
