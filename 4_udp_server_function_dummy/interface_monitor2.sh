@@ -66,32 +66,32 @@ while [ 1 ]; do
 			QOS_LEVEL=2
 			echo "" `date +'%Y-%m-%d %H:%M:%S'` Setting QoS to $QOS_LEVEL $tx_avg $btx_avg $rx_avg
 			# Run ABNO bash script
-			python /home/ubuntu/change_bandwidth.py ${QOS_LEVEL} > /dev/null
+			bash /home/ubuntu/change_bandwidth.sh ${QOS_LEVEL} > /dev/null
 		elif [[ ( "$QOS_LEVEL" == 2 ) && ( "$btx_avg" -gt 6000000 ) ]] ; then
 			QOS_LEVEL=3
 			echo "" `date +'%Y-%m-%d %H:%M:%S'` Setting QoS to $QOS_LEVEL $tx_avg $btx_avg $rx_avg
 			# Run ABNO bash script for QoS 3
-			python /home/ubuntu/change_bandwidth.py ${QOS_LEVEL} > /dev/null
+			bash /home/ubuntu/change_bandwidth.sh ${QOS_LEVEL} > /dev/null
 		elif [[ ( "$QOS_LEVEL" == 3 ) && ( "$btx_avg" -gt 14000000 ) ]] ; then
 			QOS_LEVEL=4
 			echo "" `date +'%Y-%m-%d %H:%M:%S'` Setting QoS to $QOS_LEVEL $tx_avg $btx_avg $rx_avg
 			# Run ABNO bash script for QoS 4
-			python /home/ubuntu/change_bandwidth.py ${QOS_LEVEL} > /dev/null
+			bash /home/ubuntu/change_bandwidth.sh ${QOS_LEVEL} > /dev/null
 		elif [[ ( "$QOS_LEVEL" == 4 ) && ( "$btx_avg" -lt 13000000 ) ]] ; then
 			QOS_LEVEL=3
 			# Run ABNO bash script for QoS 3
 			echo "" `date +'%Y-%m-%d %H:%M:%S'` Setting QoS to $QOS_LEVEL $tx_avg $btx_avg $rx_avg
-			python /home/ubuntu/change_bandwidth.py ${QOS_LEVEL} > /dev/null
+			bash /home/ubuntu/change_bandwidth.sh ${QOS_LEVEL} > /dev/null
 		elif [[ ( "$QOS_LEVEL" == 3 ) && ( "$btx_avg" -lt 5000000 ) ]] ; then
 			QOS_LEVEL=2
 			echo "" `date +'%Y-%m-%d %H:%M:%S'` Setting QoS to $QOS_LEVEL $tx_avg $btx_avg $rx_avg
 			# Run ABNO bash script for QoS 2
-			python /home/ubuntu/change_bandwidth.py ${QOS_LEVEL} > /dev/null
+			bash /home/ubuntu/change_bandwidth.sh ${QOS_LEVEL} > /dev/null
 		elif [[ ( "$QOS_LEVEL" == 2 ) && ( "$btx_avg" -lt 900000 ) ]] ; then
 			QOS_LEVEL=1
 			echo "" `date +'%Y-%m-%d %H:%M:%S'` Setting QoS to $QOS_LEVEL $tx_avg $btx_avg $rx_avg
 			# Run ABNO bash script for QoS 2
-			python /home/ubuntu/change_bandwidth.py ${QOS_LEVEL} > /dev/null
+			bash /home/ubuntu/change_bandwidth.sh ${QOS_LEVEL} > /dev/null
 		fi
                 # Convert values to kilobytes/sec
                 rx_val=$(($rx_avg / 1024))

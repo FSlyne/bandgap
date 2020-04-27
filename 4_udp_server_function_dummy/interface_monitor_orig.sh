@@ -11,7 +11,6 @@ if [ "$1" == "" ]; then
                 exit 99
 fi
 
-python3 /home/ubuntu/create_saturn_path.py 
 # Use two arrays to store history of rx/tx total bytes transferred
 declare -a hist_rx hist_tx
 
@@ -56,43 +55,36 @@ while [ 1 ]; do
                 tx_sum=0
                 for i in "${hist_tx[@]}"; do tx_sum=$(($tx_sum + $i)); done
                 tx_avg=$((tx_sum / ${#hist_tx[*]}))
-		
-		btx_avg=$((tx_avg * 8))
 
 		echo `date +'%Y-%m-%d %H:%M:%S'` $tx_avg $rx_avg >> usage_$1.log
 
 		# Hysteresis !!!
-		if [[ ( "$QOS_LEVEL" == 1 ) && ( "$btx_avg" -gt 1000000 ) ]] ; then
-			QOS_LEVEL=2
-			echo "" `date +'%Y-%m-%d %H:%M:%S'` Setting QoS to $QOS_LEVEL $tx_avg $btx_avg $rx_avg
-			# Run ABNO bash script
-			python /home/ubuntu/change_bandwidth.py ${QOS_LEVEL} > /dev/null
-		elif [[ ( "$QOS_LEVEL" == 2 ) && ( "$btx_avg" -gt 6000000 ) ]] ; then
-			QOS_LEVEL=3
-			echo "" `date +'%Y-%m-%d %H:%M:%S'` Setting QoS to $QOS_LEVEL $tx_avg $btx_avg $rx_avg
-			# Run ABNO bash script for QoS 3
-			python /home/ubuntu/change_bandwidth.py ${QOS_LEVEL} > /dev/null
-		elif [[ ( "$QOS_LEVEL" == 3 ) && ( "$btx_avg" -gt 14000000 ) ]] ; then
-			QOS_LEVEL=4
-			echo "" `date +'%Y-%m-%d %H:%M:%S'` Setting QoS to $QOS_LEVEL $tx_avg $btx_avg $rx_avg
-			# Run ABNO bash script for QoS 4
-			python /home/ubuntu/change_bandwidth.py ${QOS_LEVEL} > /dev/null
-		elif [[ ( "$QOS_LEVEL" == 4 ) && ( "$btx_avg" -lt 13000000 ) ]] ; then
-			QOS_LEVEL=3
-			# Run ABNO bash script for QoS 3
-			echo "" `date +'%Y-%m-%d %H:%M:%S'` Setting QoS to $QOS_LEVEL $tx_avg $btx_avg $rx_avg
-			python /home/ubuntu/change_bandwidth.py ${QOS_LEVEL} > /dev/null
-		elif [[ ( "$QOS_LEVEL" == 3 ) && ( "$btx_avg" -lt 5000000 ) ]] ; then
-			QOS_LEVEL=2
-			echo "" `date +'%Y-%m-%d %H:%M:%S'` Setting QoS to $QOS_LEVEL $tx_avg $btx_avg $rx_avg
-			# Run ABNO bash script for QoS 2
-			python /home/ubuntu/change_bandwidth.py ${QOS_LEVEL} > /dev/null
-		elif [[ ( "$QOS_LEVEL" == 2 ) && ( "$btx_avg" -lt 900000 ) ]] ; then
-			QOS_LEVEL=1
-			echo "" `date +'%Y-%m-%d %H:%M:%S'` Setting QoS to $QOS_LEVEL $tx_avg $btx_avg $rx_avg
-			# Run ABNO bash script for QoS 2
-			python /home/ubuntu/change_bandwidth.py ${QOS_LEVEL} > /dev/null
-		fi
+		if [[ ( "$QOS_LEVEL" == 1 ) && ( "$tx_avg" > 1900000 ) ]] ; then
+	            QOS_LEVEL=2
+		    echo `date +'%Y-%m-%d %H:%M:%S'` Setting QoS to $QOS_LEVEL $tx_avg $rx_avg
+	            # Run ABNO bash script
+	        elif [[ ( "$QOS_LEVEL" == 2 ) && ( "$tx_avg" > 15000000 ) ]] ; then
+                    QOS_LEVEL=3
+		    echo `date +'%Y-%m-%d %H:%M:%S'` Setting QoS to $QOS_LEVEL $tx_avg $rx_avg
+                    # Run ABNO bash script for QoS 3
+                elif [[ ( "$QOS_LEVEL" == 3 ) && ( "$tx_avg" > 19000000 ) ]] ; then
+                    QOS_LEVEL=4
+		    echo `date +'%Y-%m-%d %H:%M:%S'` Setting QoS to $QOS_LEVEL $tx_avg $rx_avg
+                    # Run ABNO bash script for QoS 4
+                elif [[ ( "$QOS_LEVEL" == 4 ) && ( "$tx_avg" < 18500000 ) ]] ; then
+                    QOS_LEVEL=3
+                    # Run ABNO bash script for QoS 3
+		    echo `date +'%Y-%m-%d %H:%M:%S'` Setting QoS to $QOS_LEVEL $tx_avg $rx_avg
+                elif [[ ( "$QOS_LEVEL" == 3 ) && ( "$tx_avg" < 14500000 ) ]] ; then
+                    QOS_LEVEL=2
+		    echo `date +'%Y-%m-%d %H:%M:%S'` Setting QoS to $QOS_LEVEL $tx_avg $rx_avg
+                    # Run ABNO bash script for QoS 2
+                elif [[ ( "$QOS_LEVEL" == 2 ) && ( "$tx_avg" < 1800000 ) ]] ; then
+                    QOS_LEVEL=1
+		    echo `date +'%Y-%m-%d %H:%M:%S'` Setting QoS to $QOS_LEVEL $tx_avg $rx_avg
+                    # Run ABNO bash script for QoS 2
+                fi
+
                 # Convert values to kilobytes/sec
                 rx_val=$(($rx_avg / 1024))
                 rx_unit="KB/s"
@@ -110,7 +102,9 @@ while [ 1 ]; do
                 fi
 
                 # Output data
-                #printf "\r    rx: %3d %4s, tx: %3d %4s" $rx_val $rx_unit $tx_val $tx_unit
+                printf "\r    rx: %3d %4s, tx: %3d %4s" $rx_val $rx_unit $tx_val $tx_unit
 
                 sleep 1
 done
+
+
