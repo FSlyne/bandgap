@@ -95,7 +95,7 @@ class tbpssub(zmqSubscriber):
 class TBPSThread(threading.Thread):
    def run(self):
      global tag
-     b=tbpssub("TBPS%s",defaultzmqbroker)
+     b=tbpssub("TBPS%s" % tag,defaultzmqbroker)
 
 @threaded
 def wavefunction(fntype='sawtooth', low=1000000, high=20000000, step=1000000,wait=1):
